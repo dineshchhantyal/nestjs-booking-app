@@ -2,7 +2,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Booking App is a simple application that allows users to book a link.
 
 ## Installation
 
@@ -23,7 +23,7 @@ $ docker run -p 3000:3000 booking-app
 ```
 
 ```bash
-#setup db
+# setup db
 $ yarn run dv:dev:restart
 
 # development

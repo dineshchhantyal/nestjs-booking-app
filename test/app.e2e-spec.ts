@@ -8,6 +8,8 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import * as pactum from 'pactum';
 import { AuthDto } from 'src/auth/dto';
 import passport from 'passport';
+import { first } from 'rxjs';
+import { EditUserDto } from 'src/user/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -25,7 +27,7 @@ describe('App e2e', () => {
     );
 
     await app.init();
-    await app.listen(3000);
+    await app.listen(3333);
 
     prisma = app.get<PrismaService>(
       PrismaService,
@@ -33,7 +35,7 @@ describe('App e2e', () => {
 
     await prisma.cleanDb();
     pactum.request.setBaseUrl(
-      'http://localhost:3000',
+      'http://localhost:3333',
     );
   });
   afterAll(() => {
@@ -50,16 +52,14 @@ describe('App e2e', () => {
           .spec()
           .post('/auth/signup')
           .withBody({ passport: data.password })
-          .expectStatus(400)
-          .inspect();
+          .expectStatus(400);
       });
       it('should throw if password is empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
           .withBody({ email: data.email })
-          .expectStatus(400)
-          .inspect();
+          .expectStatus(400);
       });
 
       it('should create a user', () => {
@@ -71,22 +71,19 @@ describe('App e2e', () => {
       });
     });
     describe('Signin', () => {
-      const access_token = '';
       it('should throw if email is empty', () => {
         return pactum
           .spec()
           .post('/auth/signin')
           .withBody({ passport: data.password })
-          .expectStatus(400)
-          .inspect();
+          .expectStatus(400);
       });
       it('should throw if password is empty', () => {
         return pactum
           .spec()
           .post('/auth/signin')
           .withBody({ email: data.email })
-          .expectStatus(400)
-          .inspect();
+          .expectStatus(400);
       });
       it('should signin a user', () => {
         return pactum
@@ -94,7 +91,6 @@ describe('App e2e', () => {
           .post('/auth/signin')
           .withBody(data)
           .expectStatus(200)
-          .inspect()
           .stores('userAt', 'access_token');
       });
     });
@@ -111,7 +107,23 @@ describe('App e2e', () => {
           .expectStatus(200);
       });
     });
-    describe('Edit user', () => {});
+    describe('Edit user', () => {
+      it('should edit user', () => {
+        const dto: EditUserDto = {
+          firstName: 'Username',
+        };
+
+        return pactum
+          .spec()
+          .patch('/users')
+          .withHeaders({
+            authorization: `Bearer $S{userAt}  `,
+          })
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.firstName);
+      });
+    });
   });
   describe('Bookmarks', () => {
     describe('Create a bookmark', () => {});
